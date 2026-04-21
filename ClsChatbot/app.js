@@ -18,7 +18,7 @@ const MAX_STEPS = 3;
 const MAX_HISTORY = 10;
 
 // 🔹 API endpoint
-app.post('/chat', async (req, res) => {
+app.post('/api/chat', async (req, res) => {
   const { message, history = [] } = req.body;
 
   // base messages
