@@ -1,0 +1,198 @@
+# Chat API with History Management (Groq + Node.js)
+
+## Overview
+
+This project implements a chat API using **Express.js** and the **Groq LLM**.
+It supports conversation continuity by maintaining chat history using both:
+
+- **Frontend state (`useState`)**
+- **Backend temporary storage (`node-cache`)**
+
+---
+
+## Current Architecture
+
+### Frontend
+
+- Uses `useState` to store chat history.
+- Sends:
+  - `message` (current user input)
+  - `history` (array of previous messages)
+
+Example format:
+
+```json
+[
+  { "role": "user", "content": "Hi" },
+  { "role": "assistant", "content": "Hello!" }
+]
+```
+
+---
+
+### Backend
+
+- Built with **Express.js**
+- Uses **Groq SDK** for LLM responses
+- Uses **node-cache** for temporary storage
+
+---
+
+## How Chat Flow Works
+
+1. User sends a message from frontend
+2. Frontend includes full `history`
+3. Backend constructs messages:
+
+```js
+[
+  { role: 'system', content: 'You are an AI assistant.' },
+  ...history,
+  { role: 'user', content: message },
+];
+```
+
+4. Request is sent to Groq model
+5. Model generates response
+6. Response is returned to frontend
+7. Frontend updates history using `useState`
+
+---
+
+## History Management
+
+### Frontend (Primary - Current Setup)
+
+- Stores full conversation using React state
+- Sends complete history on every request
+
+### Backend (`node-cache`)
+
+- Stores session data temporarily
+- Supports TTL (expiry time)
+- Used for short-term caching
+
+Example:
+
+```js
+const cache = new NodeCache({ stdTTL: 600 });
+```
+
+---
+
+## Limitations in Current Approach
+
+### 1. Stateless Backend Dependency
+
+- Backend relies on frontend for history
+- If frontend fails → history is lost
+
+---
+
+### 2. Security Risk
+
+- Frontend can modify history before sending
+- Backend blindly trusts incoming data
+
+---
+
+### 3. Temporary Storage
+
+- `node-cache` is in-memory
+- Data is lost when:
+  - Server restarts
+  - TTL expires
+
+---
+
+## Recommended Improvements
+
+### 1. Use `sessionId` Instead of Sending History
+
+Frontend should send:
+
+```json
+{
+  "sessionId": "user-123",
+  "message": "Hello"
+}
+```
+
+---
+
+### 2. Move History Control to Backend
+
+Backend should:
+
+- Fetch history using `sessionId`
+- Append new messages
+- Store updated history
+
+---
+
+### 3. Persistent Storage (Optional but Recommended)
+
+Use a database like:
+
+- MongoDB
+- MySQL
+- Firebase
+
+---
+
+## Example Improved Flow
+
+1. Frontend sends `sessionId + message`
+2. Backend retrieves history from cache/DB
+3. Backend builds message array
+4. Calls Groq API
+5. Saves updated history
+6. Returns response
+
+---
+
+## Key Concepts
+
+- `...history` → Expands previous messages into request
+- LLMs are **stateless**
+- History must be **managed manually**
+- Backend should be the **source of truth**
+
+---
+
+## Tech Stack
+
+- Node.js
+- Express.js
+- Groq SDK (LLM)
+- node-cache (in-memory storage)
+- React (frontend state management)
+
+---
+
+## Summary
+
+| Component | Responsibility       |
+| --------- | -------------------- |
+| Frontend  | UI + temporary state |
+| Backend   | API + logic          |
+| Cache     | Short-term memory    |
+| LLM       | Generates responses  |
+
+---
+
+## Final Note
+
+The current implementation works well for:
+
+- Learning
+- Prototyping
+- Small-scale apps
+
+For production systems:
+
+- Avoid trusting frontend history
+- Use backend-managed sessions
+- Add persistent storage
+
+---
