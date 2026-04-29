@@ -17,7 +17,7 @@ const groq = new Groq({
 const MAX_STEPS = 3;
 const MAX_HISTORY = 10;
 
-// 🔹 API endpoint
+// API endpoint
 app.post('/api/chat', async (req, res) => {
   const { message, history = [] } = req.body;
 
@@ -77,7 +77,7 @@ Rules:
       const msg = response.choices[0].message;
       messages.push(msg);
 
-      // ✅ Final answer
+      // Final answer
       if (!msg.tool_calls) {
         return res.json({
           reply: msg.content,
@@ -85,7 +85,7 @@ Rules:
         });
       }
 
-      // 🔧 Execute tools
+      //  Execute tools
       for (const tool of msg.tool_calls) {
         let args;
 

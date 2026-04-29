@@ -29,9 +29,9 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/chat', {
+      const response = await axios.post('/api/chat', {
         message: input,
-        history: history, // Sending current history to the backend
+        history: history
       });
 
       // Your API returns { reply: "...", history: [...] }
